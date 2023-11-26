@@ -32,8 +32,10 @@ addtask cp_downloaded_build_deps after do_unpack before do_patch
 
 PLAT_SOC = ""
 PLAT_SOC:j721e = "j721e"
+PLAT_SOC:ti-j72xx = "j721e"
 PLAT_SOC:j721s2 = "j721s2"
 PLAT_SOC:j784s4 = "j784s4"
+PLAT_SOC:ti-j78xx = "j784s4"
 PLAT_SOC:am62axx = "am62a"
 
 CPU = "A72"
@@ -41,7 +43,7 @@ CPU:am62axx = "A53"
 
 DEPENDS += "ti-vision-apps"
 
-COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm"
+COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm|ti-j7"
 
 export TARGET_FS = "${WORKDIR}/recipe-sysroot"
 
@@ -66,7 +68,7 @@ do_compile() {
     TIDL_PROTOBUF_PATH=${S}/protobuf-3.20.2 \
     GCC_LINUX_ARM_ROOT= \
     TARGET_SOC=${PLAT_SOC} \
-    CROSS_COMPILE_LINARO=aarch64-oe-linux- \
+    CROSS_COMPILE_LINARO=aarch64-wrs-linux- \
     LINUX_SYSROOT_ARM=${STAGING_DIR_TARGET} \
     TREAT_WARNINGS_AS_ERROR=0 \
     oe_runmake
@@ -78,6 +80,8 @@ OPT_DST_DIR="${D}/opt"
 
 TIDL_SOC_NAME = ""
 TIDL_SOC_NAME:j721e = "J721E"
+TIDL_SOC_NAME:ti-j72xx = "J721E"
+TIDL_SOC_NAME:ti-j78xx = "J784S4"
 TIDL_SOC_NAME:j721s2 = "J721S2"
 TIDL_SOC_NAME:j784s4 = "J784S4"
 TIDL_SOC_NAME:am62axx = "AM62A"

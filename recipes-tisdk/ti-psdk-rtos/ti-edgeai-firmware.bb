@@ -3,7 +3,7 @@ SUMMARY = "TI RTOS prebuilt binary firmware images for EdgeAI"
 LICENSE = "TI-TFL"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-ti/meta-ti-bsp/licenses/TI-TFL;md5=a1b59cb7ba626b9dbbcbf00f3fbc438a"
 
-COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm"
+COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm|ti-j7"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
@@ -14,6 +14,8 @@ inherit update-alternatives
 
 PLAT_SFX = ""
 PLAT_SFX:j721e = "j721e"
+PLAT_SFX:ti-j72xx = "j721e"
+PLAT_SFX:ti-j78xx = "j784s4"
 PLAT_SFX:j721s2 = "j721s2"
 PLAT_SFX:j784s4 = "j784s4"
 PLAT_SFX:am62axx = "am62a"
@@ -32,11 +34,17 @@ PV = "${SRCPV}"
 # Secure Build
 inherit ti-secdev
 
+DEPENDS:append:ti-j7 = "${@ '' if d.getVar('TI_SECURE_DEV_PKG_K3') else ' ti-k3-secdev-native' }"
+TI_K3_SECDEV_INSTALL_DIR:ti-j7 = "${STAGING_DIR_NATIVE}${datadir}/ti/ti-k3-secdev"
+TI_SECURE_DEV_PKG:ti-j7 = "${@ d.getVar('TI_SECURE_DEV_PKG_K3') or d.getVar('TI_K3_SECDEV_INSTALL_DIR') }"
+
 FW_DIR:edgeai = "${PLAT_SFX}/vision_apps_eaik"
 FW_DIR:adas = "${PLAT_SFX}/vision_apps_evm"
+FW_DIR:ti-j7 = "${PLAT_SFX}/vision_apps_evm"
 
 INSTALL_FW_DIR:edgeai = "${nonarch_base_libdir}/firmware/vision_apps_eaik/"
 INSTALL_FW_DIR:adas = "${nonarch_base_libdir}/firmware/vision_apps_evm/"
+INSTALL_FW_DIR:ti-j7 = "${nonarch_base_libdir}/firmware/vision_apps_evm/"
 
 MCU_1_0_FW = "vx_app_rtos_linux_mcu1_0.out"
 MCU_1_1_FW = "vx_app_rtos_linux_mcu1_1.out"
@@ -55,8 +63,10 @@ C7X_4_FW   = "vx_app_rtos_linux_c7x_4.out"
 
 FW_LIST = ""
 FW_LIST:j721e =     "              ${MCU_1_1_FW} ${MCU_2_0_FW} ${MCU_2_1_FW} ${MCU_3_0_FW} ${MCU_3_1_FW}                             ${C66_1_FW} ${C66_2_FW} ${C7X_1_FW}"
+FW_LIST:ti-j72xx =     "              ${MCU_1_1_FW} ${MCU_2_0_FW} ${MCU_2_1_FW} ${MCU_3_0_FW} ${MCU_3_1_FW}                             ${C66_1_FW} ${C66_2_FW} ${C7X_1_FW}"
 FW_LIST:j721s2 =    "              ${MCU_1_1_FW} ${MCU_2_0_FW} ${MCU_2_1_FW} ${MCU_3_0_FW} ${MCU_3_1_FW}                                                     ${C7X_1_FW} ${C7X_2_FW}"
 FW_LIST:j784s4 =    "              ${MCU_1_1_FW} ${MCU_2_0_FW} ${MCU_2_1_FW} ${MCU_3_0_FW} ${MCU_3_1_FW} ${MCU_4_0_FW} ${MCU_4_1_FW}                         ${C7X_1_FW} ${C7X_2_FW} ${C7X_3_FW} ${C7X_4_FW}"
+FW_LIST:ti-j78xx =    "              ${MCU_1_1_FW} ${MCU_2_0_FW} ${MCU_2_1_FW} ${MCU_3_0_FW} ${MCU_3_1_FW} ${MCU_4_0_FW} ${MCU_4_1_FW}                         ${C7X_1_FW} ${C7X_2_FW} ${C7X_3_FW} ${C7X_4_FW}"
 FW_LIST:am62axx =   "${MCU_1_0_FW}                                                                                                                           ${C7X_1_FW}"
 
 do_install() {
@@ -110,6 +120,23 @@ ALTERNATIVE:${PN}:j721e = "\
                     j7-c66_1-fw-sec \
                     j7-c71_0-fw-sec \
                     "
+ALTERNATIVE:${PN}:ti-j72xx = "\
+                    j7-mcu-r5f0_1-fw \
+                    j7-main-r5f0_0-fw \
+                    j7-main-r5f0_1-fw \
+                    j7-main-r5f1_0-fw \
+                    j7-main-r5f1_1-fw \
+                    j7-c66_0-fw \
+                    j7-c66_1-fw \
+                    j7-c71_0-fw\
+                    j7-main-r5f0_0-fw-sec \
+                    j7-main-r5f0_1-fw-sec \
+                    j7-main-r5f1_0-fw-sec \
+                    j7-main-r5f1_1-fw-sec \
+                    j7-c66_0-fw-sec \
+                    j7-c66_1-fw-sec \
+                    j7-c71_0-fw-sec \
+                    "   
 
 ALTERNATIVE:${PN}:j721s2 = "\
                     j721s2-mcu-r5f0_1-fw \
@@ -140,7 +167,19 @@ ALTERNATIVE:${PN}:j784s4 = "\
                     j784s4-c71_2-fw \
                     j784s4-c71_3-fw \
                     "
-
+ALTERNATIVE:${PN}:ti-j78xx = "\
+                    j784s4-mcu-r5f0_1-fw \
+                    j784s4-main-r5f0_0-fw \
+                    j784s4-main-r5f0_1-fw \
+                    j784s4-main-r5f1_0-fw \
+                    j784s4-main-r5f1_1-fw \
+                    j784s4-main-r5f2_0-fw \
+                    j784s4-main-r5f2_1-fw \
+                    j784s4-c71_0-fw \
+                    j784s4-c71_1-fw \
+                    j784s4-c71_2-fw \
+                    j784s4-c71_3-fw \
+                    " 
 ALTERNATIVE:${PN}:am62axx = "\
                     am62a-c71_0-fw \
                     "

@@ -7,13 +7,16 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/git/LICENSE;md5=dc68ab0305d85e56491b9a9aed
 
 PV = "${SRCPV}"
 BRANCH = "main"
-SRC_URI = "git://github.com/TexasInstruments/edgeai-tiovx-apps.git;branch=${BRANCH};protocol=https"
+SRC_URI = "git://github.com/TexasInstruments/edgeai-tiovx-apps.git;branch=${BRANCH};protocol=https \
+ file://0001-edgeai_camera-Fix-Werror-format-security-errors-with.patch"
 SRCREV = "5396580a44cb2757a20ad7e57f870f7a4b9d8874"
 
 PLAT_SOC = ""
 PLAT_SOC:j721e = "j721e"
+PLAT_SOC:ti-j72xx = "j721e"
 PLAT_SOC:j721s2 = "j721s2"
 PLAT_SOC:j784s4 = "j784s4"
+PLAT_SOC:ti-j78xx = "j784s4"
 PLAT_SOC:am62axx = "am62a"
 
 S = "${WORKDIR}/git"
@@ -21,7 +24,7 @@ S = "${WORKDIR}/git"
 DEPENDS = "edgeai-tiovx-modules yaml-cpp glib-2.0"
 RDEPENDS:${PN}-source = "cmake bash python3-core"
 
-COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm"
+COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm|ti-j7"
 
 export SOC = "${PLAT_SOC}"
 

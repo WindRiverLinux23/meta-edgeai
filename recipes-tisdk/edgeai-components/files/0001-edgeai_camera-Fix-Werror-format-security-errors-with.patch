@@ -1,0 +1,51 @@
+From 08f7cbe15c7dc9ea892e863e198247f9a519f4f4 Mon Sep 17 00:00:00 2001
+From: Xulin Sun <xulin.sun@windriver.com>
+Date: Sun, 26 Nov 2023 02:59:55 +0000
+Subject: [PATCH] edgeai_camera: Fix -Werror=format-security errors with
+ snprintf
+
+To fix below building issue:
+common/src/edgeai_camera.cpp:117:13: error: format not a string literal and no format arguments [-Werror=format-security]
+|   117 |     snprintf(vissObj.dcc_config_file_path,
+|       |     ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|   118 |              TIVX_FILEIO_FILE_PATH_LENGTH,
+|       |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|   119 |              camInputInfo->m_vissDccPath.c_str());
+
+Upstream-Status: pending
+
+Signed-off-by: Xulin Sun <xulin.sun@windriver.com>
+---
+ common/src/edgeai_camera.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/common/src/edgeai_camera.cpp b/common/src/edgeai_camera.cpp
+index b18c8de..8a3506f 100644
+--- a/common/src/edgeai_camera.cpp
++++ b/common/src/edgeai_camera.cpp
+@@ -116,6 +116,7 @@ int32_t camera::getConfig(InputInfo* camInputInfo, int32_t chMask)
+ 
+     snprintf(vissObj.dcc_config_file_path,
+              TIVX_FILEIO_FILE_PATH_LENGTH,
++             "%s",
+              camInputInfo->m_vissDccPath.c_str());
+ 
+     vissObj.input.bufq_depth = 1;
+@@ -143,6 +144,7 @@ int32_t camera::getConfig(InputInfo* camInputInfo, int32_t chMask)
+     /* LDC Module params init */
+     snprintf(ldcObj.dcc_config_file_path,
+              TIVX_FILEIO_FILE_PATH_LENGTH,
++             "%s",
+              camInputInfo->m_ldcDccPath.c_str());
+ 
+     /* Configuring LDC in DCC mode */
+@@ -264,4 +266,4 @@ int32_t camera::cameraCreate(vx_graph graph, InputInfo* camInputInfo)
+     return status;
+ }
+ 
+-} /* namespace ti::edgeai::common */
+\ No newline at end of file
++} /* namespace ti::edgeai::common */
+-- 
+2.35.5
+
