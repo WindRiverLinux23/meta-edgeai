@@ -22,10 +22,34 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-ti/meta-ti-bsp/licenses/TI-TFL;md
                     file://${COREBASE}/meta/files/common-licenses/OpenSSL;md5=4eb1764f3e65fafa1a25057f9082f2ae \
                     "
 
-SRC_URI = "repo://git.ti.com/git/processor-sdk/psdk_repo_manifests.git;protocol=https;branch=refs/tags/REL.PSDK.ANALYTICS.09.01.00.03;manifest=vision_apps_yocto.xml"
+SRCREV_sdk_builder = "b2117af06c17861425d187853acbadffa8c3a4e8"
+SRCREV_app_utils = "0dc760c1f91c090b10703884b95dbb92af87a694"
+SRCREV_vision_apps = "8fb0db564053ea77da8f6f9bf9f3405137433cb0"
+SRCREV_tiovx = "060d1d23300054acadab8aec5fad48f2aec06e1b"
+SRCREV_imaging = "9da0de316257bcaf70fc2e5ec1844c61d7f0bcfa"
+SRCREV_video_io = "ba6ce8f177f4ac73d9c5e8cbf6f3a50d2c6f7ce6"
+SRCREV_ti-perception-toolkit = "7074e73756fecb1eaea59b8687bbf1642e51cb78"
+SRCREV_psdk_include = "2dde83677ad4daf0d3e53bcd6d2a032a9bac53aa"
+SRCREV_arm-tidl = "113dbdee90560ba86511b9ec2590430ceca861a7"
+SRCREV_concerto = "87009d5386a0d642fcbcf5dccaf52d55898f8dc5"
+TI_BRANCH = "main"
 
-FILES:${PN} += "/opt/*"
+FILES:${PN} += "/opt/* \
+                /usr/lib64/* \
+"
 
+SRC_URI = " \
+git://git.ti.com/git/processor-sdk/sdk_builder.git;protocol=https;branch=${TI_BRANCH};branch=${TI_BRANCH};name=sdk_builder;destsuffix=repo/sdk_builder \
+git://git.ti.com/git/processor-sdk/app_utils.git;protocol=https;branch=${TI_BRANCH};name=app_utils;destsuffix=repo/app_utils \
+git://git.ti.com/git/processor-sdk/vision_apps.git;protocol=https;branch=${TI_BRANCH};name=vision_apps;destsuffix=repo/vision_apps \
+git://git.ti.com/git/processor-sdk/tiovx.git;protocol=https;branch=${TI_BRANCH};name=tiovx;destsuffix=repo/tiovx \
+git://git.ti.com/git/processor-sdk/imaging.git;protocol=https;branch=${TI_BRANCH};name=imaging;destsuffix=repo/imaging \
+git://git.ti.com/git/processor-sdk/video_io.git;protocol=https;branch=${TI_BRANCH};name=video_io;destsuffix=repo/video_io \
+git://git.ti.com/git/processor-sdk/ti-perception-toolkit.git;protocol=https;branch=${TI_BRANCH};name=ti-perception-toolkit;destsuffix=repo/ti-perception-toolkit \
+git://git.ti.com/git/processor-sdk/psdk_include.git;protocol=https;branch=${TI_BRANCH};name=psdk_include;destsuffix=repo/psdk_include \
+git://git.ti.com/git/processor-sdk-vision/arm-tidl.git;protocol=https;branch=master;name=arm-tidl;destsuffix=repo/psdk_include/tidl_j7/arm-tidl \
+git://git.ti.com/git/processor-sdk/concerto.git;protocol=https;branch=${TI_BRANCH};name=concerto;destsuffix=repo/sdk_builder/concerto \
+"
 #PTK needs:
 # EGL/egl.h
 # glm/glm.hpp
@@ -37,12 +61,14 @@ FILES:${PN} += "/opt/*"
 DEPENDS = "glm devil freetype ti-rpmsg-char repo-native mesa-pvr libpam"
 DEPENDS:remove:am62axx = " mesa-pvr"
 
-COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm"
+COMPATIBLE_MACHINE = "j721e-evm|j721e-hs-evm|j721s2-evm|j721s2-hs-evm|j784s4-evm|j784s4-hs-evm|am62axx-evm|ti-j7"
 
 PLAT_SOC = ""
 PLAT_SOC:j721e = "j721e"
+PLAT_SOC:ti-j72xx = "j721e"
 PLAT_SOC:j721s2 = "j721s2"
 PLAT_SOC:j784s4 = "j784s4"
+PLAT_SOC:ti-j78xx = "j784s4"
 PLAT_SOC:am62axx = "am62a"
 
 S = "${WORKDIR}"
@@ -52,7 +78,7 @@ EXTRA_OEMAKE += "-C ${S}/repo/sdk_builder"
 do_fetch[depends] += "repo-native:do_populate_sysroot"
 
 do_compile() {
-    CROSS_COMPILE_LINARO=aarch64-oe-linux- \
+    CROSS_COMPILE_LINARO=aarch64-wrs-linux- \
     LINUX_SYSROOT_ARM=${STAGING_DIR_TARGET} \
     TREAT_WARNINGS_AS_ERROR=0 \
     GCC_LINUX_ARM_ROOT= \
@@ -67,3 +93,12 @@ do_install() {
 }
 
 INSANE_SKIP:${PN} += "ldflags"
+
+do_install:append:ti-j7 () {
+
+    if [ ${libdir} = "/usr/lib64" ]; then
+        mkdir -p ${D}/usr/lib64/
+        mv ${D}/usr/lib/libtivision* ${D}/usr/lib64/
+        rm -rf ${D}/usr/lib
+    fi
+}
